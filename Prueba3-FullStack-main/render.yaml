@@ -1,0 +1,254 @@
+envVarGroups:
+  - name: oracle-wallet-shared
+    envVars:
+      - key: TNS_ADMIN
+        value: /app/wallet
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:oracle:thin:@mmg8hvewk688yrh4_low?TNS_ADMIN=/app/wallet
+      - key: SPRING_DATASOURCE_PASSWORD
+      - key: SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE
+        value: "2"
+      - key: SPRING_DATASOURCE_HIKARI_MINIMUMIDLE
+        value: "1"
+      - key: SPRING_DATASOURCE_HIKARI_CONNECTIONTESTQUERY
+        value: SELECT 1 FROM DUAL
+      - key: SPRING_DATASOURCE_HIKARI_VALIDATIONTIMEOUT
+        value: "30000"
+      - key: SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT
+        value: "45000"
+      - key: ORACLE_TNSNAMES
+      - key: ORACLE_SQLNET
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: none
+      - key: SPRING_JPA_SHOW_SQL
+        value: "false"
+      - key: JAVA_OPTS
+        value: -Xmx384m -Xms128m
+      - key: WALLET_BASE64
+  - name: eureka-config
+    envVars:
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: https://eureka-server-ccfr.onrender.com/eureka
+      - key: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+        value: "true"
+
+services:
+  # ============================================
+  # 1. EUREKA SERVER
+  # ============================================
+  - type: web
+    name: eureka-server
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/eureka-server
+    envVars:
+      - key: SPRING_APPLICATION_NAME
+        value: eureka-server
+      - key: SERVER_PORT
+        value: "8761"
+      - key: EUREKA_CLIENT_REGISTERWITHEUREKA
+        value: "false"
+      - key: EUREKA_CLIENT_FETCHREGISTRY
+        value: "false"
+      - key: EUREKA_SERVER_ENABLE_SELF_PRESERVATION
+        value: "false"
+      - key: JAVA_OPTS
+        value: -Xmx384m -Xms128m
+
+  # ============================================
+  # 2. API GATEWAY
+  # ============================================
+  - type: web
+    name: ms-gateway
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-gateway
+    envVars:
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-gateway
+      - key: SERVER_PORT
+        value: "8080"
+      - key: SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED
+        value: "true"
+      - key: JAVA_OPTS
+        value: -Xmx384m -Xms128m
+
+  # ============================================
+  # 3. MICROSERVICIOS DE NEGOCIO
+  # ============================================
+  - type: web
+    name: ms-usuarios
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-usuarios
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-usuarios
+      - key: SERVER_PORT
+        value: "8090"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_USUARIOS
+
+  - type: web
+    name: ms-categorias
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-categorias
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-categorias
+      - key: SERVER_PORT
+        value: "8091"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_CATEGORIAS
+
+  - type: web
+    name: ms-bodega
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-bodega
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-bodega
+      - key: SERVER_PORT
+        value: "8092"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_BODEGA
+
+  - type: web
+    name: ms-proveedores
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-proveedores
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-proveedores
+      - key: SERVER_PORT
+        value: "8093"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_PROVEEDORES
+
+  - type: web
+    name: ms-producto
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-producto
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-producto
+      - key: SERVER_PORT
+        value: "8094"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_PRODUCTOS
+      - key: MS_CATEGORIAS_URL
+        value: https://ms-categorias.onrender.com
+
+  - type: web
+    name: ms-kardex
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-kardex
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-kardex
+      - key: SERVER_PORT
+        value: "8095"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_KARDEX
+      - key: MS_PRODUCTOS_URL
+        value: https://ms-producto.onrender.com
+
+  - type: web
+    name: ms-ingresos
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-ingresos
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-ingresos
+      - key: SERVER_PORT
+        value: "8096"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_INGRESOS
+      - key: MS_PRODUCTOS_URL
+        value: https://ms-producto.onrender.com
+      - key: MS_PROVEEDORES_URL
+        value: https://ms-proveedores.onrender.com
+      - key: MS_BODEGA_URL
+        value: https://ms-bodega.onrender.com
+      - key: MS_KARDEX_URL
+        value: https://ms-kardex.onrender.com
+
+  - type: web
+    name: ms-egresos
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-egresos
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-egresos
+      - key: SERVER_PORT
+        value: "8097"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_EGRESOS
+      - key: MS_PRODUCTOS_URL
+        value: https://ms-producto.onrender.com
+      - key: MS_KARDEX_URL
+        value: https://ms-kardex.onrender.com
+
+  - type: web
+    name: ms-ajuste
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-ajuste
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-ajuste
+      - key: SERVER_PORT
+        value: "8098"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_AJUSTES
+      - key: MS_PRODUCTOS_URL
+        value: https://ms-producto.onrender.com
+      - key: MS_KARDEX_URL
+        value: https://ms-kardex.onrender.com
+
+  - type: web
+    name: ms-traslados
+    runtime: docker
+    plan: free
+    rootDir: Sistema-Bodegas.v1/Sistema-Bodegas-main/ms-traslados
+    envVars:
+      - fromGroup: oracle-wallet-shared
+      - fromGroup: eureka-config
+      - key: SPRING_APPLICATION_NAME
+        value: ms-traslados
+      - key: SERVER_PORT
+        value: "8099"
+      - key: SPRING_DATASOURCE_USERNAME
+        value: SCHEMA_TRASLADOS
+      - key: MS_PRODUCTOS_URL
+        value: https://ms-producto.onrender.com
+      - key: MS_UBICACIONES_URL
+        value: https://ms-bodega.onrender.com
+      - key: MS_BODEGA_URL
+        value: https://ms-bodega.onrender.com

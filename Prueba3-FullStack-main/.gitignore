@@ -1,0 +1,61 @@
+# Dependencias y build
+node_modules/
+target/
+build/
+dist/
+.gradle/
+.next/
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.class
+*.jar
+*.war
+*.log
+
+# IDE y sistema
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Android
+local.properties
+*.apk
+*.aab
+*.keystore
+*.jks
+google-services.json
+
+# Secretos y credenciales
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# Oracle Wallet
+wallet/
+Wallet*/
+cwallet.sso
+ewallet.p12
+ewallet.pem
+tnsnames.ora
+sqlnet.ora
+ojdbc.properties
+keystore.*
+truststore.*
+Wallet_*.zip
+ojdbc.zip
+*base64*.txt
+.github/modernize/
+
+# Config con credenciales
+application-local.properties
+application-local.yml
+application-secret*.properties
